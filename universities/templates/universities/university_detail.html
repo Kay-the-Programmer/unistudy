@@ -1,0 +1,28 @@
+{% extends "core/base.html" %}
+
+{% block title %}{{ university.name }} | ZStudy{% endblock %}
+
+{% block content %}
+  <h2>{{ university.name }}</h2>
+  <p><strong>City:</strong> {{ university.city }}</p>
+  {% if university.logo %}
+    <img src="{{ university.logo.url }}" alt="{{ university.name }} logo" style="max-width: 150px; height: auto;">
+  {% endif %}
+
+  <h3>Faculties at {{ university.name }}</h3>
+  {% if faculties %}
+    <ul>
+      {% for faculty in faculties %}
+        <li>
+          <a href="{% url 'universities:faculty_detail' uni=university.slug faculty=faculty.slug %}">
+            {{ faculty.name }}
+          </a>
+        </li>
+      {% empty %}
+        <li>No faculties listed for this university yet.</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No faculties listed for this university yet.</p>
+  {% endif %}
+{% endblock %}

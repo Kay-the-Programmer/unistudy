@@ -1,0 +1,35 @@
+{% extends "core/base.html" %}
+
+{% block title %}Welcome to ZStudy{% endblock %}
+
+{% block content %}
+  <h2>{{ welcome_message }}</h2>
+  <p>This is the main landing page for ZStudy. Explore materials, join discussions, and enhance your learning!</p>
+
+  {# Placeholder for global search bar - to be implemented later #}
+  <form action="#" method="get">
+    <input type="search" name="q" placeholder="Search materials, courses, discussions...">
+    <button type="submit">Search</button>
+  </form>
+
+  {# Later, this section can display recent activity or featured content #}
+  {#
+  {% if recent_materials %}
+    <h3>Recent Materials</h3>
+    <ul>
+      {% for material in recent_materials %}
+        <li><a href="#">{{ material.title }}</a> ({{ material.course.code }})</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  {% if recent_threads %}
+    <h3>Recent Discussions</h3>
+    <ul>
+      {% for thread in recent_threads %}
+        <li><a href="#">{{ thread.title }}</a> ({{ thread.course.code }})</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  #}
+{% endblock %}

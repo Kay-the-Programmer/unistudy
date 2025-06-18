@@ -1,0 +1,108 @@
+{% extends "core/base.html" %}
+{% load static %} {# Ensure static is loaded for JS file #}
+
+{% block title %}Upload Material | ZStudy{% endblock %}
+
+{% block extra_css %}
+{# Specific styles for this form can go here or in the main style.css #}
+<style>
+  .drop-zone {
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    background-color: #f9f9f9;
+    margin-bottom: 1rem;
+  }
+  .drop-zone.dragover {
+    border-color: var(--primary-color);
+    background-color: #eef;
+  }
+  .hidden-file-input {
+    display: none;
+  }
+  .file-feedback {
+    margin-top: 10px;
+    font-style: italic;
+  }
+  .form-field-help {
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 0.5rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <h2>Upload New Material</h2>
+
+  <p class="form-field-help">
+    Allowed file types: <strong>{{ allowed_extensions|join:", " }}</strong>.
+    Maximum file size: <strong>{{ max_file_size_mb }}MB</strong>.
+  </p>
+
+  {% if form.non_field_errors %}
+    <div class="messages">
+      {% for error in form.non_field_errors %}
+        <li class="error">{{ error }}</li>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data" id="uploadForm">
+    {% csrf_token %}
+
+    {% if form.title.errors %}<div class="messages"><li class="error">{{ form.title.errors|join:", " }}</li></div>{% endif %}
+    <p>
+      <label for="{{ form.title.id_for_label }}">Title:</label>
+      {{ form.title }}
+      <span class="form-field-help">{{ form.title.help_text }}</span>
+    </p>
+
+    {% if form.course.errors %}<div class="messages"><li class="error">{{ form.course.errors|join:", " }}</li></div>{% endif %}
+    <p>
+        <label for="{{ form.course.id_for_label }}">Course:</label>
+        {{ form.course }}
+        <span class="form-field-help">{{ form.course.help_text }}</span>
+    </p>
+
+    {% if form.material_type.errors %}<div class="messages"><li class="error">{{ form.material_type.errors|join:", " }}</li></div>{% endif %}
+    <p>
+        <label for="{{ form.material_type.id_for_label }}">Material Type:</label>
+        {{ form.material_type }}
+        <span class="form-field-help">{{ form.material_type.help_text }}</span>
+    </p>
+
+    {% if form.file.errors %}<div class="messages"><li class="error">{{ form.file.errors|join:", " }}</li></div>{% endif %}
+    <div id="dropZone" class="drop-zone">
+      <p>Drag & drop your file here, or click to select file.</p>
+      <p class="file-feedback" id="fileFeedback"></p>
+    </div>
+    {{ form.file.as_hidden }} {# Keep the original input but hide it #}
+    {# The form.file.help_text is now displayed above the form #}
+
+
+    {% if form.description.errors %}<div class="messages"><li class="error">{{ form.description.errors|join:", " }}</li></div>{% endif %}
+    <p>
+        <label for="{{ form.description.id_for_label }}">Description (Optional):</label>
+        {{ form.description }}
+        <span class="form-field-help">{{ form.description.help_text }}</span>
+    </p>
+
+    {% if form.tags.errors %}<div class="messages"><li class="error">{{ form.tags.errors|join:", " }}</li></div>{% endif %}
+    <p>
+        <label for="{{ form.tags.id_for_label }}">Tags (Optional):</label>
+        {{ form.tags }}
+        <span class="form-field-help">{{ form.tags.help_text }}</span>
+    </p>
+
+    <button type="submit">Upload Material</button>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/file_upload.js' %}"></script>
+{% endblock %}

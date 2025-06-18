@@ -1,0 +1,87 @@
+{% extends "core/base.html" %}
+
+{% block title %}{{ thread.title }} | ZStudy{% endblock %}
+
+{% block content %}
+  <div class="card thread-header-card">
+    <h2>{{ thread.title }}</h2>
+    <p><strong>Course:</strong> <a href="{% url 'materials:course_detail' pk=thread.course.pk %}">{{ thread.course.code }} - {{ thread.course.title }}</a></p>
+    <p class="post-meta">Started by: {{ thread.created_by.username|default:"Unknown" }} on {{ thread.created_at|date:"Y-m-d H:i" }}</p>
+  </div>
+
+  <div class="card add-post-card">
+    <h3>Add a New Post to this Thread</h3>
+    <form method="post" action="{% url 'discussions:thread_detail' pk=thread.pk %}">
+        {% csrf_token %}
+        {{ form.as_p }} {# This will render the 'body' field from PostForm #}
+        <button type="submit">Add Post</button>
+    </form>
+  </div>
+
+  <h3 style="margin-top: 2rem;">Posts</h3>
+  {% if posts %}
+    {% for post in posts %}
+      <div class="post card" id="post-{{ post.id }}">
+        <p class="post-meta"><strong>{{ post.author.username|default:"Anonymous" }}</strong> said on {{ post.created_at|date:"Y-m-d H:i" }}</p>
+        <div class="post-body">
+            {{ post.body|linebreaksbr }}
+        </div>
+        {% if post.parent is None %} {# Only allow replying to top-level posts directly here for simplicity #}
+          <button class="button button-small" onclick="showReplyForm({{ post.id }})">Reply</button>
+        {% endif %}
+
+        <div class="replies-section" style="margin-top:1rem;">
+            {% for reply in post.replies.all %} {# Assuming related_name='replies' and they are active #}
+              {% if reply.is_active %}
+              <div class="reply card" id="post-{{ reply.id }}" style="background-color: #f9f9f9;">
+                <p class="post-meta"><strong>{{ reply.author.username|default:"Anonymous" }}</strong> replied on {{ reply.created_at|date:"Y-m-d H:i" }}</p>
+                <div class="post-body">
+                    {{ reply.body|linebreaksbr }}
+                </div>
+                {# No reply to reply button here based on current nesting limit #}
+              </div>
+              {% endif %}
+            {% endfor %}
+        </div>
+
+        {# Hidden reply form for this post (if it's a top-level post) #}
+        {% if post.parent is None %}
+        <div id="reply-form-{{ post.id }}" class="reply-form-container card" style="display:none; margin-top:10px; background-color: #eef;">
+          <h4>Reply to {{ post.author.username|default:"Anonymous" }}</h4>
+          <form method="post" action="{% url 'discussions:thread_detail' pk=thread.pk %}">
+            {% csrf_token %}
+            {{ form.body.label_tag }}
+            {{ form.body }}
+            {% if form.body.errors %}<p class="error-message">{{ form.body.errors|join:", " }}</p>{% endif %}
+            <input type="hidden" name="parent_id" value="{{ post.id }}">
+            <button type="submit">Submit Reply</button>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+    {% empty %}
+      <div class="card"><p>No posts in this thread yet.</p></div>
+    {% endfor %}
+  {% else %}
+    <div class="card"><p>No posts in this thread yet.</p></div>
+  {% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function showReplyForm(postId) {
+    // Hide all other reply forms
+    document.querySelectorAll('.reply-form-container').forEach(form => {
+      form.style.display = 'none';
+    });
+    // Show the selected one
+    var form = document.getElementById('reply-form-' + postId);
+    if (form) {
+      form.style.display = 'block';
+      // Optionally focus the textarea
+      // form.querySelector('textarea[name="body"]').focus();
+    }
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ZStudy{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-container">
+            <div class="logo-area">
+                <a href="{% url 'core:landing_page' %}" class="site-logo">ZStudy</a>
+                {# <img src="{% static 'images/logo.png' %}" alt="ZStudy Logo"> #}
+            </div>
+
+            <div class="search-area">
+                <form action="{% url 'core:global_search' %}" method="get" class="header-search-form">
+                    <input type="search" name="q" placeholder="Search materials by title or tag..." value="{{ request.GET.q }}">
+                    <button type="submit">Search</button>
+                </form>
+            </div>
+
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="{% url 'core:landing_page' %}">Home</a></li>
+                    {% if user.is_authenticated %}
+                        <li><a href="{% url 'materials:material_upload' %}">Upload</a></li>
+                        <li>
+                            <a href="{% url 'core:notification_list' %}">
+                                Notifications
+                                {# Placeholder for badge: <span class="badge">3</span> #}
+                            </a>
+                        </li>
+                        {% if user.is_staff %}
+                            <li><a href="{% url 'core:moderation_dashboard' %}">Moderation</a></li>
+                        {% endif %}
+                        <li><a href="{% url 'accounts:logout' %}">Logout ({{ user.username }})</a></li>
+                    {% else %}
+                        <li><a href="{% url 'accounts:login' %}">Login</a></li>
+                        <li><a href="{% url 'accounts:signup' %}">Sign Up</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="main-content container">
+        {% if messages %}
+          <ul class="messages">
+            {% for message in messages %}
+              <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+
+        {% block content %}
+        <p>Welcome to ZStudy! Content will go here.</p>
+        {% endblock %}
+    </div>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; {% now "Y" %} ZStudy. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

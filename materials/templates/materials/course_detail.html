@@ -1,0 +1,151 @@
+{% extends "core/base.html" %}
+
+{% block title %}{{ course.code }} - {{ course.title }} | ZStudy{% endblock %}
+
+{% block content %}
+<div class="course-detail-layout">
+  <aside class="course-sidebar card">
+    <h4>Filter Materials</h4>
+    <form method="get" action="{% url 'materials:course_detail' pk=course.pk %}#materials">
+      {# Keep existing query parameters for other filters if any, not strictly necessary for this simple form #}
+
+      <div class="filter-group">
+        <h5>By Material Type</h5>
+        <select name="material_type" onchange="this.form.submit()">
+          <option value="" {% if not current_filters.material_type %}selected{% endif %}>All Types</option>
+          {% for type_value, type_display in material_type_choices %}
+            <option value="{{ type_value }}" {% if current_filters.material_type == type_value %}selected{% endif %}>
+              {{ type_display }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <h5>By Upload Year</h5>
+        <select name="upload_year" onchange="this.form.submit()">
+          <option value="" {% if not current_filters.upload_year %}selected{% endif %}>All Years</option>
+          {% for year_date in upload_year_options %}
+            <option value="{{ year_date.year }}" {% if current_filters.upload_year|add:0 == year_date.year %}selected{% endif %}>
+              {{ year_date.year }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <h5>By Uploader's University</h5>
+        <select name="uploader_university" onchange="this.form.submit()">
+          <option value="" {% if not current_filters.uploader_university %}selected{% endif %}>All Universities</option>
+          {% for uni in uploader_university_options %}
+            <option value="{{ uni.pk }}" {% if current_filters.uploader_university|add:0 == uni.pk %}selected{% endif %}>
+              {{ uni.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="button button-small" style="margin-top:1rem; width:100%;">Apply Filters</button>
+      <a href="{% url 'materials:course_detail' pk=course.pk %}#materials" class="button button-small button-outline" style="margin-top:0.5rem; width:100%; text-align:center;">Clear Filters</a>
+    </form>
+  </aside>
+
+  <main class="course-main-content">
+    <div class="card course-header-card">
+      <h2>{{ course.code }} - {{ course.title }}</h2>
+      <p><strong>Faculty:</strong> <a href="{% url 'universities:faculty_detail' uni=course.faculty.university.slug faculty=course.faculty.slug %}">{{ course.faculty.name }}</a></p>
+      <p><strong>University:</strong> <a href="{% url 'universities:university_detail' uni=course.faculty.university.slug %}">{{ course.faculty.university.name }}</a></p>
+      <p><strong>Year Offered:</strong> {{ course.year_offered }}</p>
+    </div>
+
+    <div class="tabs-navigation">
+      <a href="#materials" class="tab-link active" onclick="showTab('materials', this); return false;">Materials</a>
+      <a href="#discussions" class="tab-link" onclick="showTab('discussions', this); return false;">Discussions</a>
+    </div>
+
+    <div id="materials" class="tab-content active">
+      <div class="card">
+          <h3>Materials for this Course</h3>
+          <p><a href="{% url 'materials:material_upload' %}?course_id={{ course.pk }}" class="button">Upload New Material for {{course.code}}</a></p>
+          {% if materials %}
+            <ul class="course-materials-list">
+              {% for material in materials %}
+                <li id="material-{{ material.pk }}">
+                  <strong>{{ material.title }}</strong> ({{ material.get_material_type_display }})
+                  <p class="post-meta">Uploaded by: {{ material.uploaded_by.username|default:"Unknown" }} on {{ material.created_at|date:"Y-m-d" }} | Downloads: {{ material.download_count }}</p>
+                  {% if material.description %}<p><small>{{ material.description|truncatewords:30 }}</small></p>{% endif %}
+                  {% if material.tags.all %}
+                    <p class="post-meta">Tags:
+                    {% for tag in material.tags.all %}
+                      <span>{{ tag.name }}</span>{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                    </p>
+                  {% endif %}
+                  <a href="{% url 'materials:material_download' pk=material.pk %}" class="button button-small">Download</a>
+                </li>
+              {% empty %}
+                <li>No materials found matching your criteria. {% if current_filters.material_type or current_filters.upload_year or current_filters.uploader_university %}<a href="{% url 'materials:course_detail' pk=course.pk %}#materials">Clear filters</a> to see all materials.{% endif %}</li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p>No materials found matching your criteria. {% if current_filters.material_type or current_filters.upload_year or current_filters.uploader_university %}<a href="{% url 'materials:course_detail' pk=course.pk %}#materials">Clear filters</a> to see all materials.{% endif %}</p>
+          {% endif %}
+      </div>
+    </div>
+
+    <div id="discussions" class="tab-content" style="display: none;">
+      <div class="card">
+          <h3>Discussions for this Course</h3>
+          {% if discussion_threads %}
+            <ul class="course-discussions-list">
+              {% for thread in discussion_threads %}
+                <li>
+                  <a href="{% url 'discussions:thread_detail' pk=thread.pk %}"><strong>{{ thread.title }}</strong></a>
+                  <p class="post-meta">Started by: {{ thread.created_by.username|default:"Unknown" }} on {{ thread.created_at|date:"Y-m-d" }} | Posts: {{ thread.posts.count }}</p>
+                </li>
+              {% empty %}
+                <li>No discussion threads started for this course yet.</li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p>No discussion threads started for this course yet.</p>
+          {% endif %}
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showTab(tabId, clickedLink) {
+  document.querySelectorAll('.tab-content').forEach(function(tabContent) {
+    tabContent.style.display = 'none';
+  });
+  document.querySelectorAll('.tab-link').forEach(function(tabLink) {
+    tabLink.classList.remove('active');
+  });
+  document.getElementById(tabId).style.display = 'block';
+  clickedLink.classList.add('active');
+  // Update URL hash without jumping, for bookmarking/sharing
+  if(history.pushState) {
+    history.pushState(null, null, '#' + tabId);
+  } else {
+    location.hash = '#' + tabId;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var activeTabLink = document.querySelector('.tab-link.active');
+  var hash = window.location.hash;
+  if (hash) {
+    var linkForHash = document.querySelector('.tab-link[href="' + hash + '"]');
+    if (linkForHash) {
+      activeTabLink = linkForHash;
+    }
+  }
+  if (activeTabLink) {
+    activeTabLink.click(); // Show the (potentially hash-determined) active tab
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "core/base.html" %}
+
+{% block title %}Log In | ZStudy{% endblock %}
+
+{% block content %}
+<div class="auth-form-container card">
+  <h2>Log In</h2>
+  {% if form.errors and not form.non_field_errors %}
+    <p class="error-message">Please correct the errors below.</p>
+  {% endif %}
+  {% if form.non_field_errors %}
+    {% for error in form.non_field_errors %}
+      <p class="error-message">{{ error }}</p>
+    {% endfor %}
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Log In</button>
+  </form>
+  <p style="margin-top: 1rem;">Don't have an account? <a href="{% url 'accounts:signup' %}">Sign Up</a></p>
+  {# Add link to password reset if implemented later #}
+</div>
+{% endblock %}

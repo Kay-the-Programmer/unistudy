@@ -1,0 +1,55 @@
+{% extends "core/base.html" %}
+
+{% block title %}Your Notifications | ZStudy{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <h2>Your Notifications</h2>
+    {% if notifications %}
+      <ul class="notification-list">
+        {% for notification in notifications %}
+          <li class="{% if not notification.is_read %}unread{% endif %}">
+            <span class="post-meta">{{ notification.created_at|date:"Y-m-d H:i" }}</span> -
+            {{ notification.verb }}
+            {% if notification.action_object %}
+              <!-- Example: Link to the user who performed the action -->
+              <!-- <a href="#">{{ notification.action_object }}</a> -->
+               <strong>{{ notification.action_object }}</strong>
+            {% endif %}
+            {% if notification.target %}
+              <!-- Example: Link to the target object -->
+              <!-- <a href="#">{{ notification.target }}</a> -->
+               on <strong>{{ notification.target }}</strong>
+            {% endif %}
+            {% if not notification.is_read %} <span class="badge" style="background-color: var(--accent-color); color: white; font-size: 0.7rem; padding: 2px 5px; border-radius: 3px;">New</span>{% endif %}
+          </li>
+        {% empty %}
+          <p>You have no notifications.</p>
+        {% endfor %}
+      </ul>
+
+      {# Optional: Pagination controls #}
+      {% if is_paginated %}
+        <div class="pagination" style="margin-top: 1.5rem;">
+          <span class="step-links">
+            {% if page_obj.has_previous %}
+              <a href="?page=1" class="button button-small">&laquo; first</a>
+              <a href="?page={{ page_obj.previous_page_number }}" class="button button-small">previous</a>
+            {% endif %}
+
+            <span class="current-page">
+              Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+            </span>
+
+            {% if page_obj.has_next %}
+              <a href="?page={{ page_obj.next_page_number }}" class="button button-small">next</a>
+              <a href="?page={{ page_obj.paginator.num_pages }}" class="button button-small">last &raquo;</a>
+            {% endif %}
+          </span>
+        </div>
+      {% endif %}
+    {% else %}
+      <p>You have no notifications.</p>
+    {% endif %}
+  </div>
+{% endblock %}

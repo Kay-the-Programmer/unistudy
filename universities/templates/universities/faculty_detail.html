@@ -1,0 +1,26 @@
+{% extends "core/base.html" %}
+
+{% block title %}{{ faculty.name }}, {{ faculty.university.name }} | ZStudy{% endblock %}
+
+{% block content %}
+  <h2>{{ faculty.name }}</h2>
+  <p><strong>University:</strong> <a href="{% url 'universities:university_detail' uni=faculty.university.slug %}">{{ faculty.university.name }}</a></p>
+
+  <h3>Courses in {{ faculty.name }}</h3>
+  {% if courses %}
+    <ul>
+      {% for course in courses %}
+        <li>
+          {# Assuming 'course_detail' will be in 'materials' app namespace for now #}
+          <a href="{% url 'materials:course_detail' pk=course.pk %}">
+            {{ course.code }} - {{ course.title }} (Year {{ course.year_offered }})
+          </a>
+        </li>
+      {% empty %}
+        <li>No courses listed for this faculty yet.</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No courses listed for this faculty yet.</p>
+  {% endif %}
+{% endblock %}

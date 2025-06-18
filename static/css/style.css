@@ -1,0 +1,532 @@
+/* Global Settings & Variables */
+:root {
+    --primary-color: #003366; /* Deep Blue */
+    --secondary-color: #ffffff; /* White */
+    --accent-color: #ff6b00; /* Orange */
+    --text-color: #333333;
+    --light-text-color: #555555;
+    --background-color: #f4f7f6; /* Light Gray for page background */
+    --card-background: var(--secondary-color);
+    --header-bg: var(--primary-color);
+    --header-text: var(--secondary-color);
+    --border-color: #dddddd;
+    --link-color: var(--primary-color);
+    --link-hover-color: var(--accent-color);
+    --button-bg: var(--accent-color);
+    --button-text: var(--secondary-color);
+    --button-hover-bg: #e05a00; /* Darker orange for hover */
+
+    --font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px; /* Base font size */
+    line-height: 1.6;
+}
+
+body {
+    font-family: var(--font-family-sans-serif);
+    color: var(--text-color);
+    background-color: var(--background-color);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--primary-color);
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    line-height: 1.3;
+}
+h1 { font-size: 2.25rem; }
+h2 { font-size: 1.875rem; }
+h3 { font-size: 1.5rem; }
+h4 { font-size: 1.25rem; }
+
+p {
+    margin-bottom: 1rem;
+    color: var(--light-text-color);
+}
+
+a {
+    color: var(--link-color);
+    text-decoration: none;
+}
+a:hover {
+    color: var(--link-hover-color);
+    text-decoration: underline;
+}
+
+/* Layout & Containers */
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.main-content {
+    flex-grow: 1; /* Ensures footer stays at bottom */
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+/* Header */
+.site-header {
+    background-color: var(--header-bg);
+    color: var(--header-text);
+    padding: 1rem 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; /* Allow wrapping for smaller screens */
+}
+.site-logo {
+    font-size: 1.75rem;
+    font-weight: bold;
+    color: var(--header-text);
+    text-decoration: none;
+}
+.site-logo:hover {
+    color: var(--accent-color);
+    text-decoration: none;
+}
+
+.header-search-form input[type="search"] {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px 0 0 4px;
+    min-width: 250px; /* Adjust as needed */
+}
+.header-search-form button {
+    padding: 0.5rem 1rem;
+    border-radius: 0 4px 4px 0;
+    border-left: none;
+}
+
+.main-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+.main-nav li {
+    margin-left: 20px;
+}
+.main-nav a {
+    color: var(--header-text);
+    text-decoration: none;
+    font-weight: 500;
+}
+.main-nav a:hover, .main-nav a.active {
+    color: var(--accent-color);
+    text-decoration: none;
+}
+.main-nav .badge { /* Placeholder for notification badge */
+    background-color: var(--accent-color);
+    color: var(--secondary-color);
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 50%;
+    margin-left: 4px;
+}
+
+
+/* Cards */
+.card {
+    background-color: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.card h3 {
+    margin-top: 0;
+}
+
+/* Forms */
+form p { /* For {{ form.as_p }} */
+    margin-bottom: 0.75rem;
+}
+form label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-weight: bold;
+    color: var(--text-color);
+}
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="number"],
+textarea,
+select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+}
+input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(0, 51, 102, 0.2);
+}
+button, input[type="submit"], .button { /* .button class for a tags styled as buttons */
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease-in-out;
+}
+button:hover, input[type="submit"]:hover, .button:hover {
+    background-color: var(--button-hover-bg);
+    color: var(--button-text); /* Ensure text color remains on hover */
+    text-decoration: none;
+}
+.form-errorlist {
+    color: #dc3545; /* Bootstrap danger color */
+    list-style: none;
+    padding: 0;
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+.form-field-errors { /* For field specific errors if wrapped */
+    color: #dc3545;
+    font-size: 0.875em;
+    margin-top: 0.25rem;
+}
+
+/* Messages Framework */
+.messages {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1.5rem;
+}
+.messages li {
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    border: 1px solid transparent;
+}
+.messages .success {
+    color: #0f5132;
+    background-color: #d1e7dd;
+    border-color: #badbcc;
+}
+.messages .info {
+    color: #055160;
+    background-color: #cff4fc;
+    border-color: #b6effb;
+}
+.messages .warning {
+    color: #664d03;
+    background-color: #fff3cd;
+    border-color: #ffecb5;
+}
+.messages .error {
+    color: #842029;
+    background-color: #f8d7da;
+    border-color: #f5c2c7;
+}
+
+/* Footer */
+.site-footer {
+    background-color: #e9ecef; /* Light gray, slightly different from page bg */
+    color: var(--light-text-color);
+    padding: 2rem 0;
+    text-align: center;
+    font-size: 0.9rem;
+    margin-top: auto; /* Pushes footer to bottom if content is short */
+}
+.site-footer a {
+    color: var(--primary-color);
+}
+
+/* Responsive Design */
+@media (max-width: 992px) { /* Medium devices (tablets, less than 992px) */
+    .header-search-form input[type="search"] {
+        min-width: 200px;
+    }
+}
+
+@media (max-width: 768px) { /* Small devices (landscape phones, less than 768px) */
+    .header-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .logo-area, .search-area, .main-nav {
+        width: 100%;
+        margin-bottom: 0.75rem;
+    }
+    .main-nav ul {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+    }
+    .main-nav li {
+        margin-left: 0;
+        margin-bottom: 0.5rem;
+        width: 100%;
+    }
+    .main-nav a {
+        display: block; /* Make nav links take full width */
+        padding: 0.5rem 0;
+    }
+    .header-search-form input[type="search"] {
+        width: calc(100% - 80px); /* Adjust button width */
+    }
+}
+
+@media (max-width: 576px) { /* Extra small devices (portrait phones, less than 576px) */
+    h1 { font-size: 1.8rem; }
+    h2 { font-size: 1.6rem; }
+    .card { padding: 1rem; }
+    button, input[type="submit"], .button {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Specific template styles - can be moved to separate files later or kept here if small */
+
+/* accounts/login.html & accounts/signup.html */
+.auth-form-container {
+    max-width: 450px;
+    margin: 2rem auto;
+    padding: 2rem;
+}
+
+/* discussions/thread_detail.html */
+.post, .reply-form-container {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--card-background);
+}
+.post .post-meta, .reply .post-meta {
+    font-size: 0.85rem;
+    color: var(--light-text-color);
+    margin-bottom: 0.5rem;
+}
+.post .post-body, .reply .post-body {
+    margin-bottom: 0.75rem;
+}
+.post .reply-button, .reply-form-container button {
+    margin-top: 0.5rem;
+}
+.reply-form-container {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px dashed var(--border-color);
+}
+.replies-section {
+    margin-left: 20px; /* Indent replies */
+    padding-left: 20px;
+    border-left: 3px solid var(--accent-color);
+}
+.reply {
+    margin-top: 1rem;
+    background-color: #f9f9f9; /* Slightly different background for replies */
+}
+
+/* materials/course_detail.html */
+.course-materials-list li, .course-discussions-list li {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+.course-materials-list li:last-child, .course-discussions-list li:last-child {
+    border-bottom: none;
+}
+.tabs-navigation {
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--border-color);
+}
+.tabs-navigation a {
+    padding: 0.5rem 1rem;
+    display: inline-block;
+    border: 1px solid transparent; /* For active state */
+    border-bottom: none;
+    margin-right: 5px;
+    text-decoration: none;
+    color: var(--primary-color);
+    font-weight: 500;
+}
+.tabs-navigation a.active, .tabs-navigation a:hover { /* JS will be needed to set active class */
+    border-color: var(--border-color);
+    border-bottom-color: var(--background-color); /* Match page background to "lift" tab */
+    border-radius: 4px 4px 0 0;
+    text-decoration: none;
+}
+.tab-content {
+    /* display: none; */ /* JS will handle showing active tab */
+}
+.tab-content.active {
+    /* display: block; */
+}
+
+/* Notification List */
+.notification-list li {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+.notification-list li:last-child {
+    border-bottom: none;
+}
+.notification-list li.unread {
+    font-weight: bold;
+    background-color: #fef9e7; /* Light yellow for unread */
+}
+
+/* File Upload Zone specific styles (materials/material_form.html) */
+.drop-zone {
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    background-color: #f9f9f9;
+    margin-bottom: 1rem;
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+.drop-zone:hover {
+    border-color: var(--primary-color);
+    background-color: #e9ecef;
+}
+.drop-zone.dragover { /* Class added by JS */
+    border-color: var(--accent-color);
+    background-color: #fff3cd; /* Light yellow, similar to warning */
+}
+.drop-zone p {
+    margin: 0.5rem 0;
+    color: var(--light-text-color);
+}
+.file-feedback {
+    margin-top: 10px;
+    font-style: italic;
+    color: var(--primary-color);
+    font-weight: bold;
+}
+/* The actual file input is hidden via inline style in the template or specific class if needed */
+/* For example:
+.hidden-file-input {
+    display: none;
+}
+*/
+.form-field-help { /* General help text for form fields */
+    font-size: 0.85em;
+    color: #6c757d; /* Bootstrap secondary text color */
+    display: block; /* Ensure it takes its own line if needed */
+    margin-top: 0.25rem;
+}
+
+/* Search Results Page (core/search_results.html) */
+.search-results-list .material-result-item h3 {
+    margin-top: 0; /* First element in card */
+}
+.search-results-list .material-result-item .post-meta { /* Reusing post-meta for consistency */
+    font-size: 0.85rem;
+    color: var(--light-text-color);
+    margin-bottom: 0.5rem;
+}
+.search-results-list .material-result-item .button-small { /* If using a specific small button class */
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+}
+.no-results, .no-query {
+    text-align: center;
+    padding: 2rem;
+}
+
+/* Course Detail Page Filter Sidebar (materials/course_detail.html) */
+.course-detail-layout {
+    display: flex;
+    flex-wrap: wrap; /* Allow sidebar to stack on small screens */
+    gap: 2rem; /* Space between sidebar and main content */
+}
+.course-sidebar {
+    flex: 1 1 280px; /* Flex grow, shrink, basis */
+    max-width: 300px; /* Max width for sidebar */
+}
+.course-main-content {
+    flex: 2 1 600px; /* Takes more space */
+}
+.course-sidebar h4 {
+    margin-top: 0;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+.filter-group {
+    margin-bottom: 1.5rem;
+}
+.filter-group h5 {
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+}
+.filter-group select {
+    width: 100%;
+    padding: 0.5rem; /* Smaller padding for select in sidebar */
+    font-size: 0.9rem;
+}
+.filter-group ul {
+    list-style: none;
+    padding-left: 0;
+}
+.filter-group ul li a {
+    display: block;
+    padding: 0.25rem 0;
+    text-decoration: none;
+}
+.filter-group ul li a.active-filter {
+    font-weight: bold;
+    color: var(--accent-color);
+}
+.button-outline {
+    background-color: transparent;
+    color: var(--button-bg);
+    border: 1px solid var(--button-bg);
+}
+.button-outline:hover {
+    background-color: var(--button-bg);
+    color: var(--button-text);
+}
+
+
+@media (max-width: 768px) {
+    .course-detail-layout {
+        flex-direction: column;
+    }
+    .course-sidebar {
+        max-width: 100%; /* Full width on smaller screens */
+        margin-bottom: 2rem;
+    }
+}
