@@ -52,9 +52,7 @@ class Migration(migrations.Migration):
                 ("download_count", models.PositiveIntegerField(default=0)),
                 (
                     "is_active",
-                    models.BooleanField(
-                        default=True, help_text="For moderation; soft delete."
-                    ),
+                    models.BooleanField(default=True, help_text="For moderation; soft delete."),
                 ),
                 (
                     "course",

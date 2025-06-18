@@ -9,7 +9,8 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-import os
+
+import os # For environment variables
 import dj_database_url
 from dotenv import load_dotenv
 from pathlib import Path
@@ -23,12 +24,20 @@ load_dotenv()
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-p@meway85n$auup(ul!^m!4_e8wklr2*tqsxin&#5@!f9)0a#("
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-p@meway85n$auup(ul!^m!4_e8wklr2*tqsxin&#5@!f9)0a#(')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG will be True if DJANGO_DEBUG is not 'False'. Otherwise, it will be False.
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True') != 'False'
 
-ALLOWED_HOSTS = []
+
+# ALLOWED_HOSTS should be a list of strings.
+# e.g., 'example.com,www.example.com'
+allowed_hosts_str = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1')
+ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_str.split(',') if host.strip()]
+# Add specific Render.com host if applicable (often *.onrender.com)
+# if 'RENDER_EXTERNAL_HOSTNAME' in os.environ:
+#     ALLOWED_HOSTS.append(os.environ.get('RENDER_EXTERNAL_HOSTNAME'))
 
 
 # Application definition
@@ -46,10 +55,13 @@ INSTALLED_APPS = [
     "discussions",
     "core",
     "taggit",
+    "markdownify.apps.MarkdownifyConfig",
+    "rest_framework", # Added
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # Added Whitenoise
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -70,6 +82,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "core.context_processors.unread_notifications_count_processor",  # Added
             ],
         },
     },
@@ -82,9 +95,8 @@ WSGI_APPLICATION = "zstudy.wsgi.application"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600
+    "default": dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}", conn_max_age=600
     )
 }
 
@@ -124,10 +136,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = "static/"
-STATIC_ROOT = BASE_DIR / "staticfiles" # For production 'collectstatic'
+STATIC_ROOT = BASE_DIR / "staticfiles"  # For production 'collectstatic'
 STATICFILES_DIRS = [
-    BASE_DIR / "static", # For project-wide static files not tied to a specific app
+    BASE_DIR / "static",  # For project-wide static files not tied to a specific app
 ]
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' # Added Whitenoise storage
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -139,13 +152,42 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Authentication Settings
-LOGIN_URL = 'accounts:login' # Assuming you will have a login view named 'login' in 'accounts' app namespace
-LOGIN_REDIRECT_URL = '/' # Redirect to home page after login
-LOGOUT_REDIRECT_URL = '/' # Redirect to home page after logout
+LOGIN_URL = "accounts:login"  # Assumes 'login' view in 'accounts' app
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
 
 # Email backend for development (prints emails to console)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-# Custom Authentication Form (if you are replacing the default admin login form globally)
-# AUTH_FORM_MODULE = 'accounts.forms.EmailAuthenticationForm' # This is for admin, might not be what's needed for site login
-# For site login, views will explicitly use the custom form.
+# Custom Auth Form for Admin (site login uses views with custom form explicitly)
+# AUTH_FORM_MODULE = 'accounts.forms.EmailAuthenticationForm'
+
+# Markdownify Settings
+MARKDOWNIFY = {
+    "default": {
+        "BLEACH": True,
+        "STRIP": False,
+        "WHITELIST_TAGS": [
+            "p",
+            "strong",
+            "em",
+            "u",
+            "s",
+            "blockquote",
+            "ul",
+            "ol",
+            "li",
+            "h1",
+            "h2",
+            "h3",
+            "code",
+            "pre",
+            "a",
+            "br",
+            "hr",
+            "img",
+        ],
+        "WHITELIST_ATTRS": ["href", "alt", "src", "title"],
+        "LINKIFY_TEXT": {"ENABLE": True, "CALLBACKS": []},
+    }
+}

@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.dispatch import receiver
 from .models import UserProfile
 
+
 @receiver(post_save, sender=User)
 def create_or_update_user_profile(sender, instance, created, **kwargs):
     if created:
@@ -13,7 +14,7 @@ def create_or_update_user_profile(sender, instance, created, **kwargs):
     try:
         instance.profile.save()
     except UserProfile.DoesNotExist:
-        UserProfile.objects.create(user=instance) # Create it if it doesn't exist
+        UserProfile.objects.create(user=instance)  # Create it if it doesn't exist
     except AttributeError:
         # This can happen if the User instance somehow doesn't have a profile attribute yet
         # though the OneToOneField should create it. This is a safeguard.

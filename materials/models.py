@@ -1,28 +1,29 @@
 from django.db import models
-from django.conf import settings # To use settings.AUTH_USER_MODEL
-from universities.models import Course # Assuming Course model is in 'universities' app
+from django.conf import settings
+from django.urls import reverse  # For get_absolute_url
+from universities.models import Course
 from taggit.managers import TaggableManager
 
+
 class MaterialTypeChoices(models.TextChoices):
-    PAST_PAPER = 'PAST_PAPER', 'Past Paper'
-    NOTES = 'NOTES', 'Lecture Notes'
-    ASSIGNMENT = 'ASSIGNMENT', 'Assignment'
-    OTHER = 'OTHER', 'Other'
+    PAST_PAPER = "PAST_PAPER", "Past Paper"
+    NOTES = "NOTES", "Lecture Notes"
+    ASSIGNMENT = "ASSIGNMENT", "Assignment"
+    OTHER = "OTHER", "Other"
+
 
 class Material(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='materials')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="materials")
     uploaded_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='uploaded_materials'
+        related_name="uploaded_materials",
     )
     title = models.CharField(max_length=255)
-    file = models.FileField(upload_to='materials/%Y/%m/%d/')
+    file = models.FileField(upload_to="materials/%Y/%m/%d/")
     material_type = models.CharField(
-        max_length=20,
-        choices=MaterialTypeChoices.choices,
-        default=MaterialTypeChoices.OTHER
+        max_length=20, choices=MaterialTypeChoices.choices, default=MaterialTypeChoices.OTHER
     )
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -32,8 +33,21 @@ class Material(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=['course', 'material_type']),
+            models.Index(fields=["course", "material_type"]),
         ]
 
     def __str__(self):
         return f"{self.title} for {self.course.code}"
+
+    def get_absolute_url(self):
+        # Point to material on course page
+        course_url = reverse("materials:course_detail", kwargs={"pk": self.course.pk})
+        return f"{course_url}#material-{self.pk}"
+
+# STRETCH GOAL: Bookmark/Save-for-Offline
+# class UserMaterialBookmark(models.Model):
+#     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+#     material = models.ForeignKey(Material, on_delete=models.CASCADE)
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     class Meta:
+#         unique_together = ('user', 'material')

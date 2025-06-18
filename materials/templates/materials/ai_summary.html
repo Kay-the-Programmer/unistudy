@@ -1,0 +1,24 @@
+{% extends "core/base.html" %}
+
+{% block title %}AI Summary for {{ material.title }} | ZStudy{% endblock %}
+
+{% block content %}
+<div class="container card">
+    <h2>AI Generated Summary for: {{ material.title }}</h2>
+
+    {% if summary %}
+        <div class="ai-summary">
+            <p><strong>Summary:</strong></p>
+            <p>{{ summary }}</p>
+        </div>
+    {% else %}
+        <p>Could not generate a summary for this material at the moment.</p>
+    {% endif %}
+
+    <p style="margin-top: 20px;">
+        <a href="{{ material.get_absolute_url }}" class="button button-outline">Back to Material</a>
+    </p>
+
+    <p><small>Note: This summary is AI-generated and may not be perfect. Always refer to the original material for complete information.</small></p>
+</div>
+{% endblock %}

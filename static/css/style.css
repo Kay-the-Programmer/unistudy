@@ -519,6 +519,14 @@ button:hover, input[type="submit"]:hover, .button:hover {
     background-color: var(--button-bg);
     color: var(--button-text);
 }
+.button-danger {
+    background-color: #dc3545; /* Bootstrap danger red */
+    color: var(--secondary-color);
+}
+.button-danger:hover {
+    background-color: #bb2d3b; /* Darker red */
+    color: var(--secondary-color);
+}
 
 
 @media (max-width: 768px) {

@@ -1,31 +1,34 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404  # render removed
 from django.views.generic import DetailView
-from .models import University, Faculty, Course
+from django.http import Http404  # Added Http404
+from .models import University, Faculty  # Course removed
+
 
 class UniversityDetailView(DetailView):
     model = University
-    template_name = 'universities/university_detail.html'
-    slug_url_kwarg = 'uni' # The name of the slug parameter in the URL
-    slug_field = 'slug'    # The field on the University model to match against
-    context_object_name = 'university'
+    template_name = "universities/university_detail.html"
+    slug_url_kwarg = "uni"  # The name of the slug parameter in the URL
+    slug_field = "slug"  # The field on the University model to match against
+    context_object_name = "university"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # The University object is already in context as 'university'
         # Add list of its faculties
-        context['faculties'] = self.object.faculties.all()
+        context["faculties"] = self.object.faculties.all()
         return context
+
 
 class FacultyDetailView(DetailView):
     model = Faculty
-    template_name = 'universities/faculty_detail.html'
-    context_object_name = 'faculty'
+    template_name = "universities/faculty_detail.html"
+    context_object_name = "faculty"
     # We need to look up by both university slug and faculty slug
 
     def get_object(self, queryset=None):
         # Get the university first
-        uni_slug = self.kwargs.get('uni')
-        faculty_slug = self.kwargs.get('faculty')
+        uni_slug = self.kwargs.get("uni")
+        faculty_slug = self.kwargs.get("faculty")
 
         if uni_slug is None or faculty_slug is None:
             # This case should ideally be caught by URL pattern validation
@@ -43,5 +46,5 @@ class FacultyDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         # The Faculty object is already in context as 'faculty'
         # Add list of its courses
-        context['courses'] = self.object.courses.all()
+        context["courses"] = self.object.courses.all()
         return context

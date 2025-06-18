@@ -81,6 +81,7 @@
                     </p>
                   {% endif %}
                   <a href="{% url 'materials:material_download' pk=material.pk %}" class="button button-small">Download</a>
+                  <a href="{% url 'core:report_content' model_name='material' object_id=material.pk %}" class="button button-small button-danger" style="margin-left: 5px;">Report</a>
                 </li>
               {% empty %}
                 <li>No materials found matching your criteria. {% if current_filters.material_type or current_filters.upload_year or current_filters.uploader_university %}<a href="{% url 'materials:course_detail' pk=course.pk %}#materials">Clear filters</a> to see all materials.{% endif %}</li>

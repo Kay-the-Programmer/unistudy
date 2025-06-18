@@ -1,13 +1,109 @@
-{% extends "admin/base_site.html" %} {# Or your own base template #}
-{% block title %}Moderation Dashboard | ZStudy Admin{% endblock %}
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Moderation Dashboard | ZStudy{% endblock %}
 
 {% block content %}
-<h1>Moderation Dashboard</h1>
-<p>This is the placeholder for the ZStudy moderation dashboard. Staff members will find tools and queues here to review and manage user-generated content.</p>
-<p>Future items could include:</p>
-<ul>
-    <li>Materials pending approval</li>
-    <li>Reported discussion posts</li>
-    <li>User management tools</li>
-</ul>
+<div class="container">
+    <h1>Moderation Dashboard</h1>
+    <p>Tools for reviewing and managing user-generated content.</p>
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <section class="moderation-section card">
+        <h2>Recently Reported Content</h2>
+        {% if reported_notifications %}
+            <ul class="item-list">
+                {% for notification in reported_notifications %}
+                    <li>
+                        <p>
+                            <strong>Reported Item:</strong>
+                            {% if notification.target and notification.target.get_absolute_url %}
+                                <a href="{{ notification.target.get_absolute_url }}">{{ notification.target }}</a>
+                            {% elif notification.target %}
+                                {{ notification.target }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                            (Type: {{ notification.target_content_type.model }})
+                            <br>
+                            <strong>Reported by:</strong> {{ notification.action_object.user.username|default:notification.action_object.username|default:"Unknown" }}
+                            on {{ notification.created_at|date:"Y-m-d H:i" }}
+                            <br>
+                            <em>"{{ notification.verb }}"</em>
+                        </p>
+                        {% if notification.target %}
+                            {% with target_model_name=notification.target_content_type.model target_object_id=notification.target.pk current_status=notification.target.is_active %}
+                            <a href="{% url 'core:toggle_active_status' model_name=target_model_name object_id=target_object_id %}"
+                               class="button button-small {% if current_status %}button-warn{% else %}button-success{% endif %}">
+                                Mark as {% if current_status %}Inactive{% else %}Active{% endif %}
+                            </a>
+                            {% if notification.target.get_absolute_url %}
+                               <a href="{{ notification.target.get_absolute_url }}" target="_blank" class="button button-small button-outline">View Item</a>
+                            {% endif %}
+                            {% endwith %}
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No content recently reported.</p>
+        {% endif %}
+    </section>
+
+    <section class="moderation-section card">
+        <h2>Recently Inactive Materials</h2>
+        {% if inactive_materials %}
+            <ul class="item-list">
+                {% for material in inactive_materials %}
+                    <li>
+                        {{ material.title }} (Course: {{ material.course.code }}) - Currently: Inactive
+                        <a href="{% url 'core:toggle_active_status' model_name='material' object_id=material.pk %}" class="button button-small">Mark as Active</a>
+                        {% if material.get_absolute_url %}<a href="{{ material.get_absolute_url }}" target="_blank" class="button button-small button-outline">View</a>{% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No materials recently marked as inactive.</p>
+        {% endif %}
+    </section>
+
+    <section class="moderation-section card">
+        <h2>Recently Inactive Posts</h2>
+        {% if inactive_posts %}
+            <ul class="item-list">
+                {% for post in inactive_posts %}
+                    <li>
+                        Post by {{ post.author.username|default:"N/A" }} in thread "{{ post.thread.title|truncatewords:5 }}" - Currently: Inactive
+                        <br><small>"{{ post.body|truncatewords:15 }}"</small><br>
+                        <a href="{% url 'core:toggle_active_status' model_name='post' object_id=post.pk %}" class="button button-small">Mark as Active</a>
+                        {% if post.get_absolute_url %}<a href="{{ post.get_absolute_url }}" target="_blank" class="button button-small button-outline">View</a>{% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No posts recently marked as inactive.</p>
+        {% endif %}
+    </section>
+</div>
+
+<style>
+    .moderation-section { margin-bottom: 2rem; }
+    .item-list { list-style: none; padding-left: 0; }
+    .item-list li {
+        padding: 0.75rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .item-list li:last-child { border-bottom: none; }
+    .button-warn { background-color: #ffc107; color: #000; } /* Example warning button */
+    .button-warn:hover { background-color: #e0a800; }
+    .button-success { background-color: #198754; } /* Example success button */
+    .button-success:hover { background-color: #157347; }
+</style>
 {% endblock %}

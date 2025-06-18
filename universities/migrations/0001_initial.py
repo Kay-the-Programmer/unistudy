@@ -35,9 +35,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "logo",
-                    models.ImageField(
-                        blank=True, null=True, upload_to="university_logos/"
-                    ),
+                    models.ImageField(blank=True, null=True, upload_to="university_logos/"),
                 ),
             ],
         ),
@@ -56,9 +54,7 @@ class Migration(migrations.Migration):
                 ("name", models.CharField(max_length=200)),
                 (
                     "slug",
-                    models.SlugField(
-                        help_text="URL-friendly version of the name", max_length=200
-                    ),
+                    models.SlugField(help_text="URL-friendly version of the name", max_length=200),
                 ),
                 (
                     "university",

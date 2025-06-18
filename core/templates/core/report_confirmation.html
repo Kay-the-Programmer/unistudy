@@ -1,0 +1,35 @@
+{% extends "core/base.html" %}
+
+{% block title %}Report Content | ZStudy{% endblock %}
+
+{% block content %}
+<div class="container card auth-form-container"> {# Reusing auth-form-container for similar centered style #}
+    <h2>Report Content</h2>
+    <p>You are about to report the following {{ model_name }}:</p>
+
+    <div class="reported-item-summary card" style="background-color: #f8f9fa; margin-bottom: 1.5rem; padding: 1rem;">
+        {% if model_name == "material" %}
+            <strong>Title:</strong> {{ content_object.title }}<br>
+            <strong>Course:</strong> {{ content_object.course.code }} - {{ content_object.course.title }}<br>
+            {% if content_object.description %}
+                <strong>Description:</strong> {{ content_object.description|truncatewords:30 }}
+            {% endif %}
+        {% elif model_name == "post" %}
+            <strong>Author:</strong> {{ content_object.author.username|default:"Anonymous" }}<br>
+            <strong>In Thread:</strong> {{ content_object.thread.title }}<br>
+            <strong>Body:</strong> {{ content_object.body|truncatewords:30|markdownify_tags }} {# Assuming markdownify might be needed here too #}
+        {% else %}
+            <p>{{ content_object }}</p>
+        {% endif %}
+    </div>
+
+    <p>Are you sure you want to report this content? This will notify staff members for review.</p>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }} {# Empty form, just for CSRF and structure #}
+        <button type="submit" class="button button-danger">Yes, Report This Content</button>
+        <a href="{{ request.META.HTTP_REFERER|default:content_object.get_absolute_url|default:'/' }}" class="button button-outline" style="margin-left: 10px;">Cancel</a>
+    </form>
+</div>
+{% endblock %}

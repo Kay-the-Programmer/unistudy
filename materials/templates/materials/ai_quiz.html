@@ -1,0 +1,34 @@
+{% extends "core/base.html" %}
+
+{% block title %}AI Quiz for {{ material.title }} | ZStudy{% endblock %}
+
+{% block content %}
+<div class="container card">
+    <h2>AI Generated Quiz for: {{ material.title }}</h2>
+
+    {% if quiz %}
+        <form id="aiQuizForm">
+            {% for item in quiz %}
+                <div class="quiz-question card" style="margin-bottom: 1rem;">
+                    <p><strong>Question {{ forloop.counter }}:</strong> {{ item.question }}</p>
+                    {% for option in item.options %}
+                        <div>
+                            <input type="radio" name="question_{{ forloop.parentloop.counter }}" id="q{{ forloop.parentloop.counter }}_option{{ forloop.counter0 }}" value="{{ option }}">
+                            <label for="q{{ forloop.parentloop.counter }}_option{{ forloop.counter0 }}">{{ option }}</label>
+                        </div>
+                    {% endfor %}
+                    {# Placeholder for showing correct answer after submission: <p class="correct-answer" style="display:none;">Correct Answer: {{ item.answer }}</p> #}
+                </div>
+            {% endfor %}
+            <button type="submit" class="button">Submit Quiz</button> {# JS would handle submission and checking #}
+        </form>
+    {% else %}
+        <p>Could not generate a quiz for this material at the moment.</p>
+    {% endif %}
+
+    <p style="margin-top: 20px;">
+        <a href="{{ material.get_absolute_url }}" class="button button-outline">Back to Material</a>
+    </p>
+    <p><small>Note: This quiz is AI-generated and for self-assessment purposes.</small></p>
+</div>
+{% endblock %}

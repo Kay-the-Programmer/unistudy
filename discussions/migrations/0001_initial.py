@@ -31,9 +31,7 @@ class Migration(migrations.Migration):
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 (
                     "is_active",
-                    models.BooleanField(
-                        default=True, help_text="For moderation; soft delete."
-                    ),
+                    models.BooleanField(default=True, help_text="For moderation; soft delete."),
                 ),
                 (
                     "course",
@@ -70,9 +68,7 @@ class Migration(migrations.Migration):
                 ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
                 (
                     "is_active",
-                    models.BooleanField(
-                        default=True, help_text="For moderation; soft delete."
-                    ),
+                    models.BooleanField(default=True, help_text="For moderation; soft delete."),
                 ),
                 (
                     "author",

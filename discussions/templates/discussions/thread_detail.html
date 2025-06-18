@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load markdownify_tags %}
 
 {% block title %}{{ thread.title }} | ZStudy{% endblock %}
 
@@ -9,12 +10,36 @@
     <p class="post-meta">Started by: {{ thread.created_by.username|default:"Unknown" }} on {{ thread.created_at|date:"Y-m-d H:i" }}</p>
   </div>
 
+  {% if replying_to_post %}
+  <div class="card replying-to-card">
+      <p>Replying to/Quoting: <strong>{{ replying_to_post.author.username|default:"Anonymous" }}</strong>'s post (ID: {{ replying_to_post.id }})</p>
+      <div class="quoted-body" style="border-left: 3px solid #ccc; padding-left:10px; font-style:italic;">
+          {{ replying_to_post.body|truncatewords:30|markdownify }}
+      </div>
+      <p><a href="{% url 'discussions:thread_detail' pk=thread.pk %}">Clear Reply/Quote</a></p>
+  </div>
+  {% endif %}
+
   <div class="card add-post-card">
-    <h3>Add a New Post to this Thread</h3>
+    <h3>{% if replying_to_post %}Write your Reply/Quote{% else %}Add a New Post to this Thread{% endif %}</h3>
     <form method="post" action="{% url 'discussions:thread_detail' pk=thread.pk %}">
         {% csrf_token %}
-        {{ form.as_p }} {# This will render the 'body' field from PostForm #}
-        <button type="submit">Add Post</button>
+        {{ form.body.label_tag }}
+        {{ form.body }}
+        {% if form.body.errors %}<p class="error-message">{{ form.body.errors|join:", " }}</p>{% endif %}
+
+        {% if replying_to_post %}
+            {# If replying_to_post.parent is None, it's a top-level post. New post becomes its child. #}
+            {# If replying_to_post.parent is not None, it's a reply. New post becomes child of replying_to_post.parent. #}
+            <input type="hidden" name="parent_id" value="{% if replying_to_post.parent %}{{ replying_to_post.parent.id }}{% else %}{{ replying_to_post.id }}{% endif %}">
+        {% endif %}
+        {# For non-field errors related to parent validation from the view #}
+        {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+                <p class="error-message">{{ error }}</p>
+            {% endfor %}
+        {% endif %}
+        <button type="submit">{% if replying_to_post %}Submit Reply/Quote{% else %}Add Post{% endif %}</button>
     </form>
   </div>
 
@@ -24,40 +49,51 @@
       <div class="post card" id="post-{{ post.id }}">
         <p class="post-meta"><strong>{{ post.author.username|default:"Anonymous" }}</strong> said on {{ post.created_at|date:"Y-m-d H:i" }}</p>
         <div class="post-body">
-            {{ post.body|linebreaksbr }}
+            {{ post.body|markdownify }}
         </div>
-        {% if post.parent is None %} {# Only allow replying to top-level posts directly here for simplicity #}
-          <button class="button button-small" onclick="showReplyForm({{ post.id }})">Reply</button>
-        {% endif %}
+        <div class="post-actions" style="margin-top: 10px;">
+            {# Reply button uses JS to show inline form for direct reply to top-level post #}
+            <button class="button button-small" onclick="showReplyForm('{{ post.id }}', '{{ post.author.username|default:"Anonymous" }}')">Reply</button>
+            {# Quote button reloads page with form pre-filled #}
+            <a href="{% url 'discussions:thread_detail' pk=thread.pk %}?reply_to={{ post.pk }}&quote=true#add-post-card" class="button button-small">Quote</a>
+            <a href="{% url 'core:report_content' model_name='post' object_id=post.pk %}" class="button button-small button-danger" style="margin-left: 5px;">Report</a>
+        </div>
 
         <div class="replies-section" style="margin-top:1rem;">
-            {% for reply in post.replies.all %} {# Assuming related_name='replies' and they are active #}
+            {% for reply in post.replies.all %}
               {% if reply.is_active %}
               <div class="reply card" id="post-{{ reply.id }}" style="background-color: #f9f9f9;">
                 <p class="post-meta"><strong>{{ reply.author.username|default:"Anonymous" }}</strong> replied on {{ reply.created_at|date:"Y-m-d H:i" }}</p>
                 <div class="post-body">
-                    {{ reply.body|linebreaksbr }}
+                    {{ reply.body|markdownify }}
                 </div>
-                {# No reply to reply button here based on current nesting limit #}
+                <div class="post-actions" style="margin-top: 10px;">
+                    {# Quote button for a reply - quotes reply text, new post is child of original top-level post #}
+                    <a href="{% url 'discussions:thread_detail' pk=thread.pk %}?reply_to={{ reply.pk }}&quote=true#add-post-card" class="button button-small">Quote Reply</a>
+                    <a href="{% url 'core:report_content' model_name='post' object_id=reply.pk %}" class="button button-small button-danger" style="margin-left: 5px;">Report Reply</a>
+                </div>
               </div>
               {% endif %}
             {% endfor %}
         </div>
 
-        {# Hidden reply form for this post (if it's a top-level post) #}
-        {% if post.parent is None %}
+        {# Hidden reply form for this post (direct reply to top-level post) #}
         <div id="reply-form-{{ post.id }}" class="reply-form-container card" style="display:none; margin-top:10px; background-color: #eef;">
-          <h4>Reply to {{ post.author.username|default:"Anonymous" }}</h4>
+          <h4 id="reply-form-header-{{ post.id }}">Reply to {{ post.author.username|default:"Anonymous" }}</h4>
           <form method="post" action="{% url 'discussions:thread_detail' pk=thread.pk %}">
             {% csrf_token %}
             {{ form.body.label_tag }}
             {{ form.body }}
-            {% if form.body.errors %}<p class="error-message">{{ form.body.errors|join:", " }}</p>{% endif %}
+            {% comment %} It's tricky to show errors for dynamically shown forms without page reload or AJAX.
+                         This form submission goes through the same view post handling.
+                         If there are errors, the page will reload, and the main form at the top
+                         might show errors if it was the one submitted.
+                         This simple inline form doesn't easily get its errors populated back here.
+            {% endcomment %}
             <input type="hidden" name="parent_id" value="{{ post.id }}">
             <button type="submit">Submit Reply</button>
           </form>
         </div>
-        {% endif %}
       </div>
     {% empty %}
       <div class="card"><p>No posts in this thread yet.</p></div>
@@ -70,18 +106,35 @@
 
 {% block extra_js %}
 <script>
-  function showReplyForm(postId) {
+  function showReplyForm(postId, authorUsername) {
     // Hide all other reply forms
     document.querySelectorAll('.reply-form-container').forEach(form => {
       form.style.display = 'none';
     });
     // Show the selected one
-    var form = document.getElementById('reply-form-' + postId);
-    if (form) {
-      form.style.display = 'block';
-      // Optionally focus the textarea
-      // form.querySelector('textarea[name="body"]').focus();
+    var formContainer = document.getElementById('reply-form-' + postId);
+    var formHeader = document.getElementById('reply-form-header-' + postId);
+    if (formContainer) {
+      if (formHeader) formHeader.innerText = 'Reply to ' + authorUsername;
+      formContainer.style.display = 'block';
+      const textarea = formContainer.querySelector('textarea[name="body"]');
+      if (textarea) {
+        textarea.value = ''; // Clear textarea for new reply
+        textarea.focus();
+      }
     }
   }
+  // Logic for main form pre-fill (if quoting/replying via GET param)
+  document.addEventListener('DOMContentLoaded', function() {
+    const mainFormTextarea = document.querySelector('.add-post-card textarea[name="body"]');
+    if (mainFormTextarea && mainFormTextarea.value.trim() !== '') { // If pre-filled by Django template
+        mainFormTextarea.focus();
+        // Scroll to the main form if it has content (likely from a quote)
+        const mainFormCard = document.querySelector('.add-post-card');
+        if (mainFormCard) {
+            // mainFormCard.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+  });
 </script>
 {% endblock %}

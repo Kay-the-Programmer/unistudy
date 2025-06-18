@@ -31,7 +31,9 @@
                         <li>
                             <a href="{% url 'core:notification_list' %}">
                                 Notifications
-                                {# Placeholder for badge: <span class="badge">3</span> #}
+                                {% if unread_notifications_count > 0 %}
+                                    <span class="badge">{{ unread_notifications_count }}</span>
+                                {% endif %}
                             </a>
                         </li>
                         {% if user.is_staff %}
@@ -68,5 +70,15 @@
     </footer>
 
     {% block extra_js %}{% endblock %}
+    <!-- STRETCH GOAL: JavaScript for Bookmarking & Service Worker
+    <script>
+        // function handleBookmarkClick(materialId) { ... }
+        // if ('serviceWorker' in navigator) {
+        //  navigator.serviceWorker.register('/static/js/service-worker.js') // Path needs to be correct
+        //  .then(reg => console.log('Service Worker registered!', reg))
+        //  .catch(err => console.log('Service Worker registration failed:', err));
+        // }
+    </script>
+    -->
 </body>
 </html>
